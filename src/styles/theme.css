@@ -1,0 +1,161 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --background: #FFFFFF;
+  --foreground: #393939;
+  
+  --card: #FFFFFF;
+  --card-foreground: #393939;
+  
+  --popover: #FFFFFF;
+  --popover-foreground: #393939;
+  
+  --primary: #0F62FE;
+  --primary-foreground: #FFFFFF;
+  
+  --secondary: #F4F4F4;
+  --secondary-foreground: #393939;
+  
+  --muted: #F4F4F4;
+  --muted-foreground: #6F6F6F;
+  
+  --accent: #E0E0E0;
+  --accent-foreground: #393939;
+  
+  --destructive: #DA1E28;
+  --destructive-foreground: #FFFFFF;
+  
+  --border: #E0E0E0;
+  --input: #F4F4F4;
+  --input-background: #F4F4F4;
+  --switch-background: #E0E0E0;
+  
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  
+  --ring: #0F62FE;
+  
+  /* IBM Blue styled chart colors or alerts */
+  --chart-1: #0F62FE;
+  --chart-2: #198038;
+  --chart-3: #F1C21B;
+  --chart-4: #DA1E28;
+  --chart-5: #8A3FFC;
+  
+  --radius: 0.375rem;
+}
+
+.dark {
+  --background: #161616;
+  --foreground: #F4F4F4;
+  
+  --card: #262626;
+  --card-foreground: #F4F4F4;
+  
+  --popover: #262626;
+  --popover-foreground: #F4F4F4;
+  
+  --primary: #4589FF;
+  --primary-foreground: #161616;
+  
+  --secondary: #393939;
+  --secondary-foreground: #F4F4F4;
+  
+  --muted: #393939;
+  --muted-foreground: #A8A8A8;
+  
+  --accent: #525252;
+  --accent-foreground: #F4F4F4;
+  
+  --destructive: #FA4D56;
+  --destructive-foreground: #161616;
+  
+  --border: #393939;
+  --input: #393939;
+  --ring: #4589FF;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+}
