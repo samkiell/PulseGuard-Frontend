@@ -86,6 +86,7 @@ export default function DashboardPage() {
         onToggleIdentity={handleToggleIdentity}
         hoveredViolationId={hoveredViolationId}
         findings={findings}
+        selectedFile={selectedFile}
       />
       <AuditResults
         auditState={auditState}

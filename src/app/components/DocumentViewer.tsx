@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Finding } from "./AuditResults";
@@ -16,6 +17,7 @@ interface DocumentViewerProps {
   onToggleIdentity: () => void;
   hoveredViolationId: string | null;
   findings: Finding[];
+  selectedFile?: File | null;
 }
 
 interface FindingSpanProps {
@@ -85,6 +87,7 @@ export function DocumentViewer({
   onToggleIdentity,
   hoveredViolationId,
   findings,
+  selectedFile,
 }: DocumentViewerProps) {
   const isGhosted =
     auditState === "idle" ||
@@ -98,12 +101,32 @@ export function DocumentViewer({
   const ssn = byMessage("Social Security Number");
   const npi = byMessage("Provider NPI");
 
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setFileUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(selectedFile);
+    setFileUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [selectedFile]);
+
+  const isPdf = selectedFile?.type === "application/pdf" || selectedFile?.name.toLowerCase().endsWith(".pdf");
+
   return (
     <div className="flex-1 bg-secondary flex flex-col relative overflow-hidden">
       {/* Viewer Header */}
       <div className="h-14 bg-background border-b border-border flex items-center justify-between px-6 shrink-0 z-10 relative">
         <span className="text-sm font-medium text-muted-foreground">
-          {isGhosted ? "No document selected" : "patient_record_749.pdf"}
+          {isGhosted
+            ? "No document selected"
+            : selectedFile
+              ? selectedFile.name
+              : "patient_record_749.pdf"}
         </span>
 
         {/* Re-ID Toggle */}
@@ -170,153 +193,160 @@ export function DocumentViewer({
             : "opacity-100"
         }`}
       >
-        {/* Mock PDF Page */}
-        <div className="bg-white text-black w-full max-w-2xl h-max min-h-[800px] shadow-lg border border-border/50 rounded-sm p-12 flex flex-col relative">
-          {/* Header */}
-          <div className="border-b-2 border-gray-200 pb-6 mb-8 flex justify-between items-end">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 tracking-tight mb-1">
-                CITY GENERAL HOSPITAL
-              </h1>
-              <p className="text-gray-500 text-sm font-medium tracking-widest uppercase">
-                Patient Medical Record
-              </p>
-            </div>
-            <div className="text-right text-sm text-gray-500 font-mono">
-              REC-ID: 749-A2
-            </div>
-          </div>
-
-          {/* Patient Details Table — finding-driven */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8 text-sm">
-            <div>
-              <span className="text-gray-500 block mb-1">Patient Name:</span>
-              <span className="font-medium text-gray-900">
-                <FindingSpan
-                  finding={patientName}
-                  fallbackPlaceholder="[NAME]"
-                  fallbackValue="Johnathan Doe"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500 block mb-1">Date of Birth:</span>
-              <span className="font-medium text-gray-900">
-                <FindingSpan
-                  finding={dob}
-                  fallbackPlaceholder="[DATE]"
-                  fallbackValue="05/14/1982"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500 block mb-1">SSN:</span>
-              <span className="font-medium text-gray-900">
-                <FindingSpan
-                  finding={ssn}
-                  fallbackPlaceholder="[SSN]"
-                  fallbackValue="000-00-0000"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500 block mb-1">Attending NPI:</span>
-              <span className="font-medium text-gray-900">
-                <FindingSpan
-                  finding={npi}
-                  fallbackPlaceholder="[NPI]"
-                  fallbackValue="NPI-0000000000"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />
-              </span>
-            </div>
-          </div>
-
-          {/* Clinical Notes */}
-          <div className="mb-8">
-            <h3 className="font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-4">
-              Clinical Notes
-            </h3>
-            <div className="text-gray-700 leading-relaxed text-sm space-y-4">
-              <p>
-                Patient{" "}
-                <FindingSpan
-                  finding={patientName}
-                  fallbackPlaceholder="[NAME]"
-                  fallbackValue="Johnathan Doe"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />{" "}
-                (DOB{" "}
-                <FindingSpan
-                  finding={dob}
-                  fallbackPlaceholder="[DATE]"
-                  fallbackValue="05/14/1982"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />
-                ) presented to the ER complaining of severe chest pain
-                radiating to the left arm. Initial assessment confirmed
-                elevated troponin levels.
-              </p>
-              <p>
-                Insurance verification recorded under SSN{" "}
-                <FindingSpan
-                  finding={ssn}
-                  fallbackPlaceholder="[SSN]"
-                  fallbackValue="000-00-0000"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />
-                . Emergency cardiac catheterization was performed prior to
-                transfer. The patient's spouse was notified and is currently
-                present.
-              </p>
-              <p>
-                Follow-up scheduled at the outpatient clinic with attending
-                physician (
-                <FindingSpan
-                  finding={npi}
-                  fallbackPlaceholder="[NPI]"
-                  fallbackValue="NPI-0000000000"
-                  revealed={reIdEnabled}
-                  hoveredId={hoveredViolationId}
-                />
-                ). Patient advised to avoid strenuous activity for two weeks.
-              </p>
-            </div>
-          </div>
-
-          {/* Signature footer */}
-          <div className="mt-auto pt-8 border-t border-gray-200">
-            <div className="flex justify-between items-end">
-              <div className="w-48">
-                <div className="border-b-2 border-gray-300 h-8 mb-2" />
-                <p className="text-xs text-gray-500 text-center uppercase">
-                  Patient Signature
+        {fileUrl && isPdf ? (
+          <iframe
+            src={fileUrl}
+            className="w-full max-w-4xl min-h-[800px] h-full bg-white shadow-lg border border-border/50 rounded-sm"
+            title="Uploaded PDF Preview"
+          />
+        ) : (
+          <div className="bg-white text-black w-full max-w-2xl h-max min-h-[800px] shadow-lg border border-border/50 rounded-sm p-12 flex flex-col relative">
+            {/* Header */}
+            <div className="border-b-2 border-gray-200 pb-6 mb-8 flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800 tracking-tight mb-1">
+                  CITY GENERAL HOSPITAL
+                </h1>
+                <p className="text-gray-500 text-sm font-medium tracking-widest uppercase">
+                  Patient Medical Record
                 </p>
               </div>
+              <div className="text-right text-sm text-gray-500 font-mono">
+                REC-ID: 749-A2
+              </div>
+            </div>
 
-              <div className="w-48">
-                <div className="border-b-2 border-gray-300 h-8 mb-2 flex items-end justify-center">
-                  <span className="font-serif italic text-xl text-gray-700">
-                    Sarah Jenkins, MD
-                  </span>
+            {/* Patient Details Table — finding-driven */}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8 text-sm">
+              <div>
+                <span className="text-gray-500 block mb-1">Patient Name:</span>
+                <span className="font-medium text-gray-900">
+                  <FindingSpan
+                    finding={patientName}
+                    fallbackPlaceholder="[NAME]"
+                    fallbackValue="Johnathan Doe"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500 block mb-1">Date of Birth:</span>
+                <span className="font-medium text-gray-900">
+                  <FindingSpan
+                    finding={dob}
+                    fallbackPlaceholder="[DATE]"
+                    fallbackValue="05/14/1982"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500 block mb-1">SSN:</span>
+                <span className="font-medium text-gray-900">
+                  <FindingSpan
+                    finding={ssn}
+                    fallbackPlaceholder="[SSN]"
+                    fallbackValue="000-00-0000"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500 block mb-1">Attending NPI:</span>
+                <span className="font-medium text-gray-900">
+                  <FindingSpan
+                    finding={npi}
+                    fallbackPlaceholder="[NPI]"
+                    fallbackValue="NPI-0000000000"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />
+                </span>
+              </div>
+            </div>
+
+            {/* Clinical Notes */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-4">
+                Clinical Notes
+              </h3>
+              <div className="text-gray-700 leading-relaxed text-sm space-y-4">
+                <p>
+                  Patient{" "}
+                  <FindingSpan
+                    finding={patientName}
+                    fallbackPlaceholder="[NAME]"
+                    fallbackValue="Johnathan Doe"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />{" "}
+                  (DOB{" "}
+                  <FindingSpan
+                    finding={dob}
+                    fallbackPlaceholder="[DATE]"
+                    fallbackValue="05/14/1982"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />
+                  ) presented to the ER complaining of severe chest pain
+                  radiating to the left arm. Initial assessment confirmed
+                  elevated troponin levels.
+                </p>
+                <p>
+                  Insurance verification recorded under SSN{" "}
+                  <FindingSpan
+                    finding={ssn}
+                    fallbackPlaceholder="[SSN]"
+                    fallbackValue="000-00-0000"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />
+                  . Emergency cardiac catheterization was performed prior to
+                  transfer. The patient's spouse was notified and is currently
+                  present.
+                </p>
+                <p>
+                  Follow-up scheduled at the outpatient clinic with attending
+                  physician (
+                  <FindingSpan
+                    finding={npi}
+                    fallbackPlaceholder="[NPI]"
+                    fallbackValue="NPI-0000000000"
+                    revealed={reIdEnabled}
+                    hoveredId={hoveredViolationId}
+                  />
+                  ). Patient advised to avoid strenuous activity for two weeks.
+                </p>
+              </div>
+            </div>
+
+            {/* Signature footer */}
+            <div className="mt-auto pt-8 border-t border-gray-200">
+              <div className="flex justify-between items-end">
+                <div className="w-48">
+                  <div className="border-b-2 border-gray-300 h-8 mb-2" />
+                  <p className="text-xs text-gray-500 text-center uppercase">
+                    Patient Signature
+                  </p>
                 </div>
-                <p className="text-xs text-gray-500 text-center uppercase">
-                  Physician Signature
-                </p>
+
+                <div className="w-48">
+                  <div className="border-b-2 border-gray-300 h-8 mb-2 flex items-end justify-center">
+                    <span className="font-serif italic text-xl text-gray-700">
+                      Sarah Jenkins, MD
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 text-center uppercase">
+                    Physician Signature
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
